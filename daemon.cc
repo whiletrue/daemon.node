@@ -43,6 +43,29 @@ Handle<Value> CloseIO(const Arguments& args) {
 	close(STDERR_FILENO);
 }
 
+// Reopen Standard IN/OUT/ERR Streams
+Handle<Value> ReopenIO(const Arguments& args) {
+    int fd;
+    if ((fd = open("/dev/null", O_RDWR) < 0) {
+        return Boolean::New(false);
+    }
+    
+    String::Utf8Value outfile(args[0]->ToString());
+    if (outfile) {
+        fd = open(*outfile, O_CREAT|O_WRONLY|O_APPEND, 0644);
+    } else {
+        if (dup(fd) < 0) {
+            return Boolean::New(false);
+        }
+    }
+    
+    if (dup(fd) < 0) {
+        return Boolean::New(false);
+    }
+    
+    return Boolean::New(true);
+}
+
 // File-lock to make sure that only one instance of daemon is running.. also for storing PID
 /* lock ( filename )
 *** filename: a path to a lock-file.
@@ -71,4 +94,5 @@ extern "C" void init(Handle<Object> target) {
 	target->Set(String::New("start"), FunctionTemplate::New(Start)->GetFunction());
 	target->Set(String::New("lock"), FunctionTemplate::New(LockD)->GetFunction());
 	target->Set(String::New("closeIO"), FunctionTemplate::New(CloseIO)->GetFunction());
+    target->Set(String::New("reopenIO"), FunctionTemplate::New(ReopenIO)->GetFunction());
 }
