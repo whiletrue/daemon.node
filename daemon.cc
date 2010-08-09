@@ -46,12 +46,12 @@ Handle<Value> CloseIO(const Arguments& args) {
 // Reopen Standard IN/OUT/ERR Streams
 Handle<Value> ReopenIO(const Arguments& args) {
     int fd;
-    if ((fd = open("/dev/null", O_RDWR) < 0) {
+    if ((fd = open("/dev/null", O_RDWR)) < 0) {
         return Boolean::New(false);
     }
     
     String::Utf8Value outfile(args[0]->ToString());
-    if (outfile) {
+    if (outfile.length() > 0) {
         fd = open(*outfile, O_CREAT|O_WRONLY|O_APPEND, 0644);
     } else {
         if (dup(fd) < 0) {
@@ -90,9 +90,8 @@ Handle<Value> LockD(const Arguments& args) {
 
 extern "C" void init(Handle<Object> target) {
 	HandleScope scope;
-	
 	target->Set(String::New("start"), FunctionTemplate::New(Start)->GetFunction());
 	target->Set(String::New("lock"), FunctionTemplate::New(LockD)->GetFunction());
 	target->Set(String::New("closeIO"), FunctionTemplate::New(CloseIO)->GetFunction());
-    target->Set(String::New("reopenIO"), FunctionTemplate::New(ReopenIO)->GetFunction());
+    	target->Set(String::New("reopenIO"), FunctionTemplate::New(ReopenIO)->GetFunction());
 }
